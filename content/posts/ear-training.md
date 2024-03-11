@@ -15,6 +15,6 @@ I've been thinking about making something similar for a long time and this video
 
 I think that the next step is to continue building out the functionality. I want it to change key after each run, it should be possible to have multiple secret notes to be played back and that should be configurable. Maybe play back the secret notes as a cluster/chord... It should be possible to customize the speed and ofcourse it needs a fun UI, probably a SVG piano, hand drawn...? :thinking:
 
-The current version of the ear training app is [here]({{< ref "/ear" >}} "Ear training").
+The current version of the ear training app is [here]({{< ref "/ear-training" >}} "Ear training").
 
 Come back later and have a look as build the ear training, the actual blog and more. Peace!
