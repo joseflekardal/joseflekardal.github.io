@@ -1,0 +1,17 @@
+{{- define "main" -}}
+<main>
+  <div>{{ .Content }}</div>
+  <hr />
+
+  <ul>
+    {{- $pag := .Paginate (where .Site.RegularPages "Type" "in"
+    .Site.MainSections) -}} {{- range $pag.Pages -}}
+    <li>
+      <a href="{{ .RelPermalink }}"
+        >{{ .Date.Format "2006-01-02" }} | {{ .LinkTitle }}</a
+      >
+    </li>
+    {{- end -}}
+  </ul>
+</main>
+{{- end -}}

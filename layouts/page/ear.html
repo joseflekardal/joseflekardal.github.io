@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ .Site.Title }} - {{ .Title }}</title>
+  </head>
+  <body>
+    <main>
+      <h1>{{ .Title }}</h1>
+
+      <div>{{- .Content -}}</div>
+
+      <div id="app">
+        <div>Score: <span id="score">0</span></div>
+        <button>Play</button>
+      </div>
+    </main>
+
+    <script type="module">
+      const app = document.getElementById("app");
+      const score = app.querySelector("#score");
+
+      app.querySelector("button").addEventListener("click", run);
+      const notes = [
+        { name: "C", audio: "040" },
+        { name: "D", audio: "042" },
+        { name: "E", audio: "044" },
+        { name: "F", audio: "045" },
+        { name: "G", audio: "047" },
+        { name: "A", audio: "049" },
+        { name: "B", audio: "051" },
+        { name: "C", audio: "052" },
+      ].map((note) => {
+        return {
+          name: note.name,
+          audio: new Audio(
+            `http://carolinegabriel.com/demo/js-keyboard/sounds/${note.audio}.wav`,
+          ),
+        };
+      });
+
+      function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      function formatAnswer(str) {
+        const parsedAnswer = parseInt(str);
+
+        if (Number.isNaN(parsedAnswer)) {
+          throw new Error("Bad input");
+        }
+
+        return parsedAnswer;
+      }
+
+      function getAnswer(promptStr) {
+        const answer = prompt(promptStr);
+
+        return formatAnswer(answer);
+      }
+
+      function getRandomNote() {
+        return Math.floor(Math.random() * notes.length);
+      }
+
+      function incrementScore() {
+        score.innerText = parseInt(score.innerText) + 1;
+      }
+
+      async function run() {
+        for (const note of notes) {
+          note.audio.currentTime = 0;
+          await note.audio.play();
+          await sleep(500);
+        }
+
+        const noteIndex = getRandomNote();
+
+        notes[noteIndex].audio.currentTime = 0;
+
+        await sleep(500);
+
+        await notes[noteIndex].audio.play();
+
+        const answer = getAnswer("What note was it?");
+
+        if (answer === noteIndex + 1) {
+          incrementScore();
+          run();
+        } else {
+          const runAgain = confirm(
+            `Wrong answer, the note was ${noteIndex}. Wanna play again?`,
+          );
+
+          score.innerText = 0;
+          if (runAgain) {
+            run();
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
