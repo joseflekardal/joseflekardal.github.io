@@ -1,7 +1,7 @@
 +++
 title = 'Ear Training'
 date = 2024-03-11T20:46:44+01:00
-draft = true
+draft = false
 +++
 
 ## Hi :wave:
