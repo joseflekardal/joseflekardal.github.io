@@ -20,6 +20,17 @@
       <div id="app">
         <div>Score: <span id="score">0</span></div>
         <button>Play</button>
+
+        <section>
+          <button data-id="1">1</button>
+          <button data-id="2">2</button>
+          <button data-id="3">3</button>
+          <button data-id="4">4</button>
+          <button data-id="5">5</button>
+          <button data-id="6">6</button>
+          <button data-id="7">7</button>
+          <button data-id="8">8</button>
+        </section>
       </div>
     </main>
 
@@ -60,8 +71,22 @@
         return parsedAnswer;
       }
 
-      function getAnswer(promptStr) {
-        const answer = prompt(promptStr);
+      async function getAnswer(promptStr) {
+        const answer = await new Promise((resolve) => {
+          const buttonWrapper = app.querySelector("section");
+
+          buttonWrapper.addEventListener(
+            "click",
+            (event) => {
+              if (event.target.tagName === "BUTTON") {
+                resolve(event.target.dataset.id);
+              }
+            },
+            {
+              once: true,
+            },
+          );
+        });
 
         return formatAnswer(answer);
       }
@@ -89,7 +114,7 @@
 
         await notes[noteIndex].audio.play();
 
-        const answer = getAnswer("What note was it?");
+        const answer = await getAnswer();
 
         if (answer === noteIndex + 1) {
           incrementScore();
