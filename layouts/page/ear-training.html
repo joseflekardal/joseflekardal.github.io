@@ -19,117 +19,123 @@
 
       <div id="app">
         <div>Score: <span id="score">0</span></div>
-        <button>Play</button>
+        <button onclick="run()">Play</button>
 
         <section>
-          <button data-id="1">1</button>
-          <button data-id="2">2</button>
-          <button data-id="3">3</button>
-          <button data-id="4">4</button>
-          <button data-id="5">5</button>
-          <button data-id="6">6</button>
-          <button data-id="7">7</button>
-          <button data-id="8">8</button>
+          <button data-id="0">1</button>
+          <button data-id="1">2</button>
+          <button data-id="2">3</button>
+          <button data-id="3">4</button>
+          <button data-id="4">5</button>
+          <button data-id="5">6</button>
+          <button data-id="6">7</button>
+          <button data-id="7">8</button>
         </section>
       </div>
     </main>
 
     <script type="module">
-      const app = document.getElementById("app");
-      const score = app.querySelector("#score");
+      const VOLUME = 0.5;
+      const BPM = 100;
+      const buttonWrapper = document.querySelector("section");
+      const score = document.getElementById("score");
 
-      app.querySelector("button").addEventListener("click", run);
-      const notes = [
-        { name: "C", audio: "040" },
-        { name: "D", audio: "042" },
-        { name: "E", audio: "044" },
-        { name: "F", audio: "045" },
-        { name: "G", audio: "047" },
-        { name: "A", audio: "049" },
-        { name: "B", audio: "051" },
-        { name: "C", audio: "052" },
-      ].map((note) => {
-        return {
-          name: note.name,
-          audio: new Audio(
-            `http://carolinegabriel.com/demo/js-keyboard/sounds/${note.audio}.wav`,
-          ),
-        };
-      });
+      let notes = [261.63, 293.66, 329.63, 349.23, 392, 440, 493.88, 523.25];
 
-      function sleep(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
+      let ctx = new AudioContext();
+
+      function up() {
+        notes = notes.map((n) => n * 2);
       }
 
-      function formatAnswer(str) {
-        const parsedAnswer = parseInt(str);
+      function down() {
+        notes = notes.map((n) => n / 2);
+      }
 
-        if (Number.isNaN(parsedAnswer)) {
-          throw new Error("Bad input");
+      function playNote(freq, release, time, onEnded) {
+        const osc = ctx.createOscillator();
+
+        osc.type = "sine";
+
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        const env = new GainNode(ctx);
+
+        env.gain.cancelScheduledValues(time);
+        env.gain.setValueAtTime(VOLUME, time);
+        env.gain.linearRampToValueAtTime(0, time + release);
+
+        osc.connect(env).connect(ctx.destination);
+        osc.start(time);
+        osc.stop(time + release);
+
+        if (onEnded) {
+          osc.addEventListener("ended", onEnded, { once: true });
         }
-
-        return parsedAnswer;
-      }
-
-      async function getAnswer(promptStr) {
-        const answer = await new Promise((resolve) => {
-          const buttonWrapper = app.querySelector("section");
-
-          buttonWrapper.addEventListener(
-            "click",
-            (event) => {
-              if (event.target.tagName === "BUTTON") {
-                resolve(event.target.dataset.id);
-              }
-            },
-            {
-              once: true,
-            },
-          );
-        });
-
-        return formatAnswer(answer);
       }
 
       function getRandomNote() {
-        return Math.floor(Math.random() * notes.length);
+        return notes[Math.floor(Math.random() * notes.length)];
       }
 
-      function incrementScore() {
-        score.innerText = parseInt(score.innerText) + 1;
+      function getBpm(bpm) {
+        return bpm / 60;
       }
 
-      async function run() {
-        for (const note of notes) {
-          note.audio.currentTime = 0;
-          await note.audio.play();
-          await sleep(500);
-        }
+      function getAnswer() {
+        return new Promise((resolve) => {
+          function onClick(event) {
+            if (event.target.tagName === "BUTTON") {
+              buttonWrapper.removeEventListener("click", onClick);
 
-        const noteIndex = getRandomNote();
+              const answer = Number(event.target.dataset.id);
+              resolve(answer);
+            }
+          }
 
-        notes[noteIndex].audio.currentTime = 0;
+          buttonWrapper.addEventListener("click", onClick);
+        });
+      }
 
-        await sleep(500);
+      function onEnded(secretNote) {
+        return async () => {
+          const answer = await getAnswer();
+          const isAnswerCorrect = notes[answer] === secretNote;
 
-        await notes[noteIndex].audio.play();
-
-        const answer = await getAnswer();
-
-        if (answer === noteIndex + 1) {
-          incrementScore();
-          run();
-        } else {
-          const runAgain = confirm(
-            `Wrong answer, the note was ${noteIndex}. Wanna play again?`,
-          );
+          if (isAnswerCorrect) {
+            score.innerText = Number(score.innerText) + 1;
+            run();
+            return;
+          }
 
           score.innerText = 0;
-          if (runAgain) {
+
+          if (
+            confirm(
+              `should've been ${notes.indexOf(secretNote) + 1}, play again?`,
+            )
+          ) {
             run();
           }
-        }
+        };
       }
+
+      window.run = function () {
+        ctx = new AudioContext();
+        const subdivision = 2;
+
+        notes.forEach((note, i) => {
+          playNote(note, 0.2, i / getBpm(BPM) / subdivision);
+        });
+
+        const secretNote = getRandomNote();
+
+        playNote(
+          secretNote,
+          0.2,
+          (notes.length + 1) / getBpm(BPM) / subdivision,
+          onEnded(secretNote),
+        );
+      };
     </script>
   </body>
 </html>
