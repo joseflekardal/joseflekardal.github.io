@@ -18,8 +18,23 @@
       <div>{{- .Content -}}</div>
 
       <div id="app">
+        <form>
+          <h3>Play before each secret note:</h3>
+          <label>
+            <input type="radio" name="before" value="all" checked /> Scale
+          </label>
+          <label>
+            <input type="radio" name="before" value="root" /> Root
+          </label>
+          <label>
+            <input type="radio" name="before" value="none" /> None
+          </label>
+        </form>
+
         <div>Score: <span id="score">0</span></div>
         <button onclick="run()">Play</button>
+
+        <hr />
 
         <section>
           <button data-id="0">1</button>
@@ -39,10 +54,13 @@
       const BPM = 100;
       const buttonWrapper = document.querySelector("section");
       const score = document.getElementById("score");
+      let firstRun = true;
+
+      let before = "all";
 
       let notes = [261.63, 293.66, 329.63, 349.23, 392, 440, 493.88, 523.25];
 
-      let ctx = new AudioContext();
+      let ctx;
 
       function up() {
         notes = notes.map((n) => n * 2);
@@ -108,6 +126,7 @@
           }
 
           score.innerText = 0;
+          firstRun = true;
 
           if (
             confirm(
@@ -119,10 +138,8 @@
         };
       }
 
-      window.run = function () {
-        ctx = new AudioContext();
+      function all() {
         const subdivision = 2;
-
         notes.forEach((note, i) => {
           playNote(note, 0.2, i / getBpm(BPM) / subdivision);
         });
@@ -132,9 +149,66 @@
         playNote(
           secretNote,
           0.2,
-          (notes.length + 1) / getBpm(BPM) / subdivision,
+          (notes.length + 2) / getBpm(BPM) / subdivision,
           onEnded(secretNote),
         );
+      }
+
+      function root() {
+        const subdivision = 2;
+        playNote(notes[0], 0.2, 0);
+
+        const secretNote = getRandomNote();
+
+        playNote(
+          secretNote,
+          0.2,
+          3 / getBpm(BPM) / subdivision,
+          onEnded(secretNote),
+        );
+      }
+
+      function none() {
+        const subdivision = 2;
+        const secretNote = getRandomNote();
+
+        playNote(
+          secretNote,
+          0.2,
+          3 / getBpm(BPM) / subdivision,
+          onEnded(secretNote),
+        );
+      }
+
+      window.run = function () {
+        ctx = new AudioContext();
+
+        const settingsForm = document.querySelector("form");
+
+        const form = new FormData(settingsForm);
+
+        before = form.get("before");
+
+        if (firstRun) {
+          all();
+
+          firstRun = false;
+          return;
+        }
+
+        switch (before) {
+          case "all":
+            all();
+            break;
+          case "root":
+            root();
+            break;
+          case "none":
+            none();
+            break;
+          default:
+            throw Error("Not a valid option");
+        }
       };
     </script>
   </body>
