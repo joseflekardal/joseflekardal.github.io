@@ -1,3 +1,3 @@
-# Hi. It's Josef :wave:
+# Hi. It's Josef!
 
 Some blogging and fun projects.

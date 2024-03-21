@@ -1,215 +1,205 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ .Site.Title }} - {{ .Title }}</title>
-  </head>
-  <body>
-    <main>
-      <a
-        href="https://github.com/joseflekardal/joseflekardal.github.io/commit/{{ .GitInfo.Hash }}"
-        target="_blank"
-        >{{ .GitInfo.AbbreviatedHash }} @ {{ .GitInfo.CommitDate.Format
-        "2006-01-02" }}</a
-      >
-      <h1>{{ .Title }}</h1>
+{{ define "main" }}
+<div>
+  <main>
+    <a
+      href="https://github.com/joseflekardal/joseflekardal.github.io/commit/{{ .GitInfo.Hash }}"
+      target="_blank"
+      >{{ .GitInfo.AbbreviatedHash }} @ {{ .GitInfo.CommitDate.Format
+      "2006-01-02" }}</a
+    >
+    <h1>{{ .Title }}</h1>
 
-      <div>{{- .Content -}}</div>
+    <div>{{- .Content -}}</div>
 
-      <div id="app">
-        <form>
-          <h3>Play before each secret note:</h3>
-          <label>
-            <input type="radio" name="before" value="all" checked /> Scale
-          </label>
-          <label>
-            <input type="radio" name="before" value="root" /> Root
-          </label>
-          <label>
-            <input type="radio" name="before" value="none" /> None
-          </label>
-        </form>
+    <div id="app">
+      <form>
+        <h3>Play before each secret note:</h3>
+        <label>
+          <input type="radio" name="before" value="all" checked /> Scale
+        </label>
+        <label> <input type="radio" name="before" value="root" /> Root </label>
+        <label> <input type="radio" name="before" value="none" /> None </label>
+      </form>
 
-        <div>Score: <span id="score">0</span></div>
-        <button onclick="run()">Play</button>
+      <div>Score: <span id="score">0</span></div>
+      <button onclick="run()">Play</button>
 
-        <hr />
+      <hr />
 
-        <section>
-          <button data-id="0">1</button>
-          <button data-id="1">2</button>
-          <button data-id="2">3</button>
-          <button data-id="3">4</button>
-          <button data-id="4">5</button>
-          <button data-id="5">6</button>
-          <button data-id="6">7</button>
-          <button data-id="7">8</button>
-        </section>
-      </div>
-    </main>
+      <section>
+        <button data-id="0">1</button>
+        <button data-id="1">2</button>
+        <button data-id="2">3</button>
+        <button data-id="3">4</button>
+        <button data-id="4">5</button>
+        <button data-id="5">6</button>
+        <button data-id="6">7</button>
+        <button data-id="7">8</button>
+      </section>
+    </div>
+  </main>
 
-    <script type="module">
-      const VOLUME = 0.5;
-      const BPM = 100;
-      const buttonWrapper = document.querySelector("section");
-      const score = document.getElementById("score");
-      let firstRun = true;
+  <script type="module">
+    const VOLUME = 0.5;
+    const BPM = 100;
+    const buttonWrapper = document.querySelector("section");
+    const score = document.getElementById("score");
+    let firstRun = true;
 
-      let before = "all";
+    let before = "all";
 
-      let notes = [261.63, 293.66, 329.63, 349.23, 392, 440, 493.88, 523.25];
+    let notes = [261.63, 293.66, 329.63, 349.23, 392, 440, 493.88, 523.25];
 
-      let ctx;
+    let ctx;
 
-      function up() {
-        notes = notes.map((n) => n * 2);
+    function up() {
+      notes = notes.map((n) => n * 2);
+    }
+
+    function down() {
+      notes = notes.map((n) => n / 2);
+    }
+
+    function playNote(freq, release, time, onEnded) {
+      const osc = ctx.createOscillator();
+
+      osc.type = "sine";
+
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      const env = new GainNode(ctx);
+
+      env.gain.cancelScheduledValues(time);
+      env.gain.setValueAtTime(VOLUME, time);
+      env.gain.linearRampToValueAtTime(0, time + release);
+
+      osc.connect(env).connect(ctx.destination);
+      osc.start(time);
+      osc.stop(time + release);
+
+      if (onEnded) {
+        osc.addEventListener("ended", onEnded, { once: true });
       }
+    }
 
-      function down() {
-        notes = notes.map((n) => n / 2);
-      }
+    function getRandomNote() {
+      return notes[Math.floor(Math.random() * notes.length)];
+    }
 
-      function playNote(freq, release, time, onEnded) {
-        const osc = ctx.createOscillator();
+    function getBpm(bpm) {
+      return bpm / 60;
+    }
 
-        osc.type = "sine";
+    function getAnswer() {
+      return new Promise((resolve) => {
+        function onClick(event) {
+          if (event.target.tagName === "BUTTON") {
+            buttonWrapper.removeEventListener("click", onClick);
 
-        osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        const env = new GainNode(ctx);
-
-        env.gain.cancelScheduledValues(time);
-        env.gain.setValueAtTime(VOLUME, time);
-        env.gain.linearRampToValueAtTime(0, time + release);
-
-        osc.connect(env).connect(ctx.destination);
-        osc.start(time);
-        osc.stop(time + release);
-
-        if (onEnded) {
-          osc.addEventListener("ended", onEnded, { once: true });
+            const answer = Number(event.target.dataset.id);
+            resolve(answer);
+          }
         }
-      }
 
-      function getRandomNote() {
-        return notes[Math.floor(Math.random() * notes.length)];
-      }
+        buttonWrapper.addEventListener("click", onClick);
+      });
+    }
 
-      function getBpm(bpm) {
-        return bpm / 60;
-      }
+    function onEnded(secretNote) {
+      return async () => {
+        const answer = await getAnswer();
+        const isAnswerCorrect = notes[answer] === secretNote;
 
-      function getAnswer() {
-        return new Promise((resolve) => {
-          function onClick(event) {
-            if (event.target.tagName === "BUTTON") {
-              buttonWrapper.removeEventListener("click", onClick);
-
-              const answer = Number(event.target.dataset.id);
-              resolve(answer);
-            }
-          }
-
-          buttonWrapper.addEventListener("click", onClick);
-        });
-      }
-
-      function onEnded(secretNote) {
-        return async () => {
-          const answer = await getAnswer();
-          const isAnswerCorrect = notes[answer] === secretNote;
-
-          if (isAnswerCorrect) {
-            score.innerText = Number(score.innerText) + 1;
-            run();
-            return;
-          }
-
-          score.innerText = 0;
-          firstRun = true;
-
-          if (
-            confirm(
-              `should've been ${notes.indexOf(secretNote) + 1}, play again?`,
-            )
-          ) {
-            run();
-          }
-        };
-      }
-
-      function all() {
-        const subdivision = 2;
-        notes.forEach((note, i) => {
-          playNote(note, 0.2, i / getBpm(BPM) / subdivision);
-        });
-
-        const secretNote = getRandomNote();
-
-        playNote(
-          secretNote,
-          0.2,
-          (notes.length + 2) / getBpm(BPM) / subdivision,
-          onEnded(secretNote),
-        );
-      }
-
-      function root() {
-        const subdivision = 2;
-        playNote(notes[0], 0.2, 0);
-
-        const secretNote = getRandomNote();
-
-        playNote(
-          secretNote,
-          0.2,
-          3 / getBpm(BPM) / subdivision,
-          onEnded(secretNote),
-        );
-      }
-
-      function none() {
-        const subdivision = 2;
-        const secretNote = getRandomNote();
-
-        playNote(
-          secretNote,
-          0.2,
-          3 / getBpm(BPM) / subdivision,
-          onEnded(secretNote),
-        );
-      }
-
-      window.run = function () {
-        ctx = new AudioContext();
-
-        const settingsForm = document.querySelector("form");
-
-        const form = new FormData(settingsForm);
-
-        before = form.get("before");
-
-        if (firstRun) {
-          all();
-
-          firstRun = false;
+        if (isAnswerCorrect) {
+          score.innerText = Number(score.innerText) + 1;
+          run();
           return;
         }
 
-        switch (before) {
-          case "all":
-            all();
-            break;
-          case "root":
-            root();
-            break;
-          case "none":
-            none();
-            break;
-          default:
-            throw Error("Not a valid option");
+        score.innerText = 0;
+        firstRun = true;
+
+        if (
+          confirm(
+            `should've been ${notes.indexOf(secretNote) + 1}, play again?`,
+          )
+        ) {
+          run();
         }
       };
-    </script>
-  </body>
-</html>
+    }
+
+    function all() {
+      const subdivision = 2;
+      notes.forEach((note, i) => {
+        playNote(note, 0.2, i / getBpm(BPM) / subdivision);
+      });
+
+      const secretNote = getRandomNote();
+
+      playNote(
+        secretNote,
+        0.2,
+        (notes.length + 2) / getBpm(BPM) / subdivision,
+        onEnded(secretNote),
+      );
+    }
+
+    function root() {
+      const subdivision = 2;
+      playNote(notes[0], 0.2, 0);
+
+      const secretNote = getRandomNote();
+
+      playNote(
+        secretNote,
+        0.2,
+        3 / getBpm(BPM) / subdivision,
+        onEnded(secretNote),
+      );
+    }
+
+    function none() {
+      const subdivision = 2;
+      const secretNote = getRandomNote();
+
+      playNote(
+        secretNote,
+        0.2,
+        3 / getBpm(BPM) / subdivision,
+        onEnded(secretNote),
+      );
+    }
+
+    window.run = function () {
+      ctx = new AudioContext();
+
+      const settingsForm = document.querySelector("form");
+
+      const form = new FormData(settingsForm);
+
+      before = form.get("before");
+
+      if (firstRun) {
+        all();
+
+        firstRun = false;
+        return;
+      }
+
+      switch (before) {
+        case "all":
+          all();
+          break;
+        case "root":
+          root();
+          break;
+        case "none":
+          none();
+          break;
+        default:
+          throw Error("Not a valid option");
+      }
+    };
+  </script>
+</div>
+{{ end }}

@@ -1,0 +1,54 @@
+* {
+  --primary-color: #f8b200;
+  --bg-color: #2e2e2e;
+  --text-color: #fff;
+}
+
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: "PT Mono", monospace;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+a {
+  color: var(--text-color);
+}
+
+h1 {
+  font-family: "Lacquer", system-ui;
+  font-weight: 400;
+  font-style: normal;
+  color: var(--primary-color);
+  font-size: 5rem;
+  margin-bottom: 1rem;
+  margin-top: 1.5rem;
+}
+
+.start-page .content {
+  margin-bottom: 6rem;
+
+  & p {
+    font-size: 1.75rem;
+  }
+}
+
+.start-page {
+  & ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  & a {
+    text-decoration: none;
+  }
+}
+
+footer {
+  margin-top: 2rem;
+}
