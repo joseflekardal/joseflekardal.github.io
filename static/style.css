@@ -4,6 +4,13 @@
   --text-color: #fff;
 }
 
+@media (prefers-color-scheme: light) {
+  * {
+    --bg-color: #fff3d6;
+    --text-color: #4d4636;
+  }
+}
+
 body {
   background: var(--bg-color);
   color: var(--text-color);
