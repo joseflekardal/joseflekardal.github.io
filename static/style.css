@@ -73,3 +73,9 @@ button {
   border-radius: 4px;
   font-weight: bold;
 }
+
+section:has(> button) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
