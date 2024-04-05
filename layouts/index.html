@@ -6,8 +6,13 @@
     {{- $pag := .Paginate (where .Site.RegularPages "Type" "in"
     .Site.MainSections) -}} {{- range $pag.Pages -}}
     <li>
-      <a href="{{ .RelPermalink }}"
-        >{{ .Date.Format "2006-01-02" }} | {{ .LinkTitle }} {{ .Summary }}
+      <a href="{{ .RelPermalink }}">
+        {{ .Date.Format "2006-01-02" }} | {{ .LinkTitle }} | 
+        {{ range .Params.categories }}
+          {{ . }}
+        {{ end }}
+
+        {{ .Summary }}
       </a>
     </li>
     {{- end -}}
