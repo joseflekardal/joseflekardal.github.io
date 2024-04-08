@@ -13,15 +13,27 @@
 
     <div id="app">
       <form>
-        <h3>Play before each secret note:</h3>
-        <label>
-          <input type="radio" name="before" value="all" checked /> Scale
-        </label>
-        <label> <input type="radio" name="before" value="root" /> Root </label>
-        <label> <input type="radio" name="before" value="none" /> None </label>
+        <fieldset>
+          <h3>Play before each secret note:</h3>
+          <label>
+            <input type="radio" name="before" value="all" checked /> Scale
+          </label>
+          <label>
+            <input type="radio" name="before" value="root" /> Root
+          </label>
+          <label>
+            <input type="radio" name="before" value="none" /> None
+          </label>
+        </fieldset>
+        <fieldset>
+          <h3>Number of secret notes:</h3>
+          <label>
+            <input type="number" name="secretNotes" value="1" min="1" />
+          </label>
+        </fieldset>
       </form>
 
-      <div>Score: <span id="score">0</span></div>
+      <div class="score">Score: <span id="score">0</span></div>
       <button onclick="run()">Play</button>
 
       <hr />
@@ -45,6 +57,7 @@
     const buttonWrapper = document.querySelector("section");
     const score = document.getElementById("score");
     let firstRun = true;
+    let numberOfSecretNotes = 1;
 
     let before = "all";
 
@@ -104,27 +117,31 @@
       });
     }
 
-    function onEnded(secretNote) {
+    function onEnded(secretNotes) {
       return async () => {
-        const answer = await getAnswer();
-        const isAnswerCorrect = notes[answer] === secretNote;
+        for (const secretNote of secretNotes) {
+          const answer = await getAnswer();
+          const isAnswerCorrect = notes[answer] === secretNote;
 
-        if (isAnswerCorrect) {
-          score.innerText = Number(score.innerText) + 1;
-          run();
+          if (isAnswerCorrect) {
+            score.innerText = Number(score.innerText) + 1;
+            continue;
+          }
+
+          score.innerText = 0;
+          firstRun = true;
+
+          if (
+            confirm(
+              `should've been ${notes.indexOf(secretNote) + 1}, play again?`,
+            )
+          ) {
+            run();
+          }
           return;
         }
 
-        score.innerText = 0;
-        firstRun = true;
-
-        if (
-          confirm(
-            `should've been ${notes.indexOf(secretNote) + 1}, play again?`,
-          )
-        ) {
-          run();
-        }
+        run();
       };
     }
 
@@ -134,40 +151,62 @@
         playNote(note, 0.2, i / getBpm(BPM) / subdivision);
       });
 
-      const secretNote = getRandomNote();
+      const secretNotes = [];
+      let i = 0;
 
-      playNote(
-        secretNote,
-        0.2,
-        (notes.length + 2) / getBpm(BPM) / subdivision,
-        onEnded(secretNote),
-      );
+      while (i++ < numberOfSecretNotes) {
+        secretNotes.push(getRandomNote());
+      }
+
+      secretNotes.forEach((secretNote, i) => {
+        playNote(
+          secretNote,
+          0.2,
+          (notes.length + i + 2) / getBpm(BPM) / subdivision,
+          i + 1 === secretNotes.length ? onEnded(secretNotes) : null,
+        );
+      });
     }
 
     function root() {
       const subdivision = 2;
       playNote(notes[0], 0.2, 0);
 
-      const secretNote = getRandomNote();
+      const secretNotes = [];
+      let i = 0;
 
-      playNote(
-        secretNote,
-        0.2,
-        3 / getBpm(BPM) / subdivision,
-        onEnded(secretNote),
-      );
+      while (i++ < numberOfSecretNotes) {
+        secretNotes.push(getRandomNote());
+      }
+
+      secretNotes.forEach((secretNote, i) => {
+        playNote(
+          secretNote,
+          0.2,
+          (i + 2) / getBpm(BPM) / subdivision,
+          i + 1 === secretNotes.length ? onEnded(secretNotes) : null,
+        );
+      });
     }
 
     function none() {
       const subdivision = 2;
-      const secretNote = getRandomNote();
 
-      playNote(
-        secretNote,
-        0.2,
-        3 / getBpm(BPM) / subdivision,
-        onEnded(secretNote),
-      );
+      const secretNotes = [];
+      let i = 0;
+
+      while (i++ < numberOfSecretNotes) {
+        secretNotes.push(getRandomNote());
+      }
+
+      secretNotes.forEach((secretNote, i) => {
+        playNote(
+          secretNote,
+          0.2,
+          (i + 2) / getBpm(BPM) / subdivision,
+          i + 1 === secretNotes.length ? onEnded(secretNotes) : null,
+        );
+      });
     }
 
     window.run = function () {
@@ -178,6 +217,7 @@
       const form = new FormData(settingsForm);
 
       before = form.get("before");
+      numberOfSecretNotes = Number(form.get("secretNotes"));
 
       if (firstRun) {
         all();

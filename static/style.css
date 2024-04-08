@@ -92,8 +92,31 @@ section:has(> button) {
   padding: 2rem;
   border-radius: 15px;
 
-  h3 {
-    margin-top: 0;
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    & h3 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  input {
+    border: none;
+    padding: 0.5rem;
+    border-radius: 4px;
+  }
+
+  fieldset {
+    all: unset;
+    display: block;
+  }
+
+  .score {
+    margin-bottom: 1rem;
   }
 }
 
