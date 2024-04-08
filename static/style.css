@@ -72,10 +72,33 @@ button {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   font-weight: bold;
+  transition: 50ms transform color ease-in;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.05);
+    color: white;
+  }
 }
 
 section:has(> button) {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+#app {
+  background: #534f45;
+  padding: 2rem;
+  border-radius: 15px;
+
+  h3 {
+    margin-top: 0;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  #app {
+    color: white;
+  }
 }
