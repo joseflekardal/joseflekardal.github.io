@@ -1,0 +1,89 @@
+#note-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#settings {
+  border-radius: 4px;
+}
+
+details {
+  margin-bottom: 2rem;
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+}
+
+label {
+  display: block;
+}
+
+#secrets {
+  margin: 2rem auto;
+  display: flex; // make it grid bruh
+  justify-content: center;
+  gap: 1rem;
+  font-size: 54px;
+  width: 800px;
+  flex-wrap: wrap;
+
+  & span {
+    --animate-duration: 500ms;
+    opacity: 0;
+    flex: 1 0 150px;
+    height: 150px;
+    background: var(--primary-color);
+    color: #fff;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+
+    &.animate__shakeX {
+      opacity: 1;
+    }
+  }
+}
+
+/* #app {
+  background: #534f45;
+  padding: 2rem;
+  border-radius: 15px;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    & h3 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  input {
+    border: none;
+    padding: 0.5rem;
+    border-radius: 4px;
+  }
+
+  fieldset {
+    all: unset;
+    display: block;
+  }
+
+  .score {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  #app {
+    color: white;
+  }
+} */

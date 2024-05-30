@@ -4,9 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    {{ if hugo.IsProduction }}
-      {{ template "_internal/google_analytics.html" . }}
-    {{ end }}
+    {{ if hugo.IsProduction }} {{ template "_internal/google_analytics.html" .
+    }} {{ end }}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -15,6 +14,17 @@
     />
     <link href="/style.css" rel="stylesheet" />
     <title>{{ block "title" . }} {{ .Site.Title }} {{ end }}</title>
+
+    {{ range .Params.scripts }}
+      <script src="{{ . }}"></script>
+    {{ end }}
+    {{ range .Params.styles }}
+      <link rel="stylesheet" href="{{ . }}">
+    {{end}}
+
+    {{ with .Resources.GetMatch "style.css" }}
+      <style>{{ .Content | safeCSS }}</style>
+    {{ end }}
   </head>
   <body>
     <header>

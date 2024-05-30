@@ -6,6 +6,7 @@ categories = ['Dev']
 +++
 
 ### Hi :wave:
+
 I finally decided to start a blog, somewhere I can put out my own stuff and thoughts. Maybe someone will read it, _probably not_, that is completely fine - I do this 100% for myself.
 
 The first little project that I am currently working on is a web app for ear training. This one is inspired by a youtube video that I saw the other day.
