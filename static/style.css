@@ -80,3 +80,7 @@ button {
     color: white;
   }
 }
+
+.highlight pre {
+  padding: 1rem;
+}

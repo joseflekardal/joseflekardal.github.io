@@ -4,3 +4,9 @@ title = 'josef lekardal'
 enableEmoji = true
 enableGitInfo = true
 googleAnalytics = 'G-YGFJ1SMNEM'
+
+[markup]
+  [markup.highlight]
+    style = 'github-dark'
+
+
