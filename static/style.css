@@ -75,7 +75,8 @@ button {
   transition: 50ms transform color ease-in;
   cursor: pointer;
 
-  &:hover {
+  &:hover,
+  &.highlight {
     transform: scale(1.05);
     color: white;
   }
