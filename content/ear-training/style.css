@@ -23,11 +23,12 @@ label {
 
 #secrets {
   margin: 2rem auto;
-  display: flex; // make it grid bruh
+  display: flex; /* make it grid bruh */
   justify-content: center;
   gap: 1rem;
   font-size: 54px;
   width: 800px;
+  height: 200px;
   flex-wrap: wrap;
 
   & span {
@@ -49,7 +50,7 @@ label {
   }
 }
 
-/* #app {
+#app {
   background: #534f45;
   padding: 2rem;
   border-radius: 15px;
@@ -86,4 +87,4 @@ label {
   #app {
     color: white;
   }
-} */
+}

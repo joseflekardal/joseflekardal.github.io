@@ -1,8 +1,16 @@
 {{ define "main" }}
 <div>
   <main>
+    <a
+      href="https://github.com/joseflekardal/joseflekardal.github.io/commit/{{ .GitInfo.Hash }}"
+      target="_blank"
+      >{{ .GitInfo.AbbreviatedHash }} @ {{ .GitInfo.CommitDate.Format
+      "2006-01-02" }}</a
+    >
+    <h1>{{ .Title }}</h1>
+
+    <div>{{- .Content -}}</div>
     <div id="app">
-      <h1>Ear training 👂</h1>
       <details>
         <summary>Settings ⚙️</summary>
 
