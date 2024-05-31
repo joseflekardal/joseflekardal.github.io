@@ -183,13 +183,13 @@ function run() {
   t.start();
 }
 
-$start.addEventListener("click", run);
+$start.addEventListener("mousedown", run);
 
-$root.addEventListener("click", () => {
+$root.addEventListener("mousedown", () => {
   synth.triggerAttackRelease(data.singles[0].notes, CONFIG.subdivision);
 });
 
-$secrets.addEventListener("click", (event) => {
+$secrets.addEventListener("mousedown", (event) => {
   const $el = event.target;
   if ($el.tagName === "SPAN") {
     const arrIndex = Array.from($secrets.children).indexOf($el);
