@@ -37,5 +37,11 @@
       <a href="https://github.com/joseflekardal">GitHub</a>
       {{ end }}
     </footer>
+
+    {{ with .Resources.GetMatch "*.js" }}
+      <script type="module">
+        {{ .Content | safeJS }}
+      </script>
+    {{ end }}
   </body>
 </html>

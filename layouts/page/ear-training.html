@@ -65,6 +65,7 @@
       <hr />
 
       <div id="note-wrapper">
+        <h3>Single notes:</h3>
         <div>
           <button data-note="C4">1</button>
           <button data-note="D4">2</button>
@@ -76,6 +77,7 @@
           <button data-note="C5">8</button>
         </div>
 
+        <h3>Chords:</h3>
         <div>
           <button data-note="C">I</button>
           <button data-note="Dm7">II-7</button>
@@ -90,11 +92,5 @@
       <div id="secrets"></div>
     </div>
   </main>
-
-  {{ with .Resources.GetMatch "ear-training.js" }}
-    <script type="module">
-      {{ .Content | safeJS }}
-    </script>
-  {{ end }}
 </div>
 {{ end }}
