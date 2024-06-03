@@ -4,19 +4,113 @@ const CONFIG = {
 };
 let state = {};
 
-const $buttons = Array.from(document.querySelectorAll("#app button"));
-const $start = document.getElementById("start");
-const $root = document.getElementById("root");
-const $noteWrapper = document.getElementById("note-wrapper");
-const $settings = document.getElementById("settings");
-const $score = document.getElementById("score");
-const $bpmRange = $settings.querySelector("input[name=bpm]");
-const $bpmHeader = document.getElementById("bpm");
-const $secrets = document.getElementById("secrets");
+class UI {
+  constructor(document, SecretNote) {
+    this.$buttons = Array.from(document.querySelectorAll("#app button"));
+    this.$start = document.getElementById("start");
+    this.$root = document.getElementById("root");
+    this.$noteWrapper = document.getElementById("note-wrapper");
+    this.$settings = document.getElementById("settings");
+    this.$score = document.getElementById("score");
+    this.$bpmRange = this.$settings.querySelector("input[name=bpm]");
+    this.$bpmHeader = document.getElementById("bpm");
+    this.$secretContainer = document.getElementById("secrets");
 
-$bpmRange.addEventListener("input", (event) => {
-  $bpmHeader.innerText = `Speed (${event.target.value} bpm)`;
-});
+    this.SecretNote = SecretNote;
+
+    this.hookupEventListeners();
+  }
+
+  hookupEventListeners() {
+    this.$bpmRange.addEventListener("input", (event) => {
+      this.$bpmHeader.innerText = `Speed (${event.target.value} bpm)`;
+    });
+  }
+
+  cleanup() {
+    this.$secretContainer.innerHTML = "";
+  }
+
+  incrementScore() {
+    this.$score.innerText = parseInt(this.$score.innerText) + 1;
+  }
+
+  decrementScore() {
+    this.$score.innerText = parseInt(this.$score.innerText) - 1;
+  }
+
+  flashButtonByName(chordName) {
+    return () => {
+      this.$buttons.forEach(($btn) => {
+        if (chordName && $btn.dataset.note === chordName) {
+          $btn.classList.add("highlight");
+        } else {
+          $btn.classList.remove("highlight");
+        }
+      });
+    };
+  }
+
+  getSecretByIndex(index) {
+    return new this.SecretNote(this.$secretContainer, index);
+  }
+
+  createSecret() {
+    const $secret = document.createElement("span");
+    $secret.innerText = "?";
+    $secret.classList.add("animate__animated");
+    this.$secretContainer.appendChild($secret);
+  }
+
+  showSecretByIndex(index) {
+    this.$secretContainer.children[index].classList.add("animate__bounceIn");
+  }
+
+  getUserInput() {
+    const formData = new FormData(this.$settings);
+
+    return {
+      bpm: Number(formData.get("bpm")),
+      numberOfSecretNotes: Number(formData.get("secretNotes")),
+      secretType: formData.get("secret"),
+      preroll: formData.get("preroll"),
+    };
+  }
+
+  onAnswer(cb) {
+    this.$noteWrapper.addEventListener(
+      "click",
+      (event) => {
+        const clickedElement = event.target;
+
+        if (clickedElement.tagName === "BUTTON") {
+          cb(clickedElement.dataset.note);
+        }
+      },
+      { once: true }
+    );
+  }
+}
+
+class SecretNote {
+  constructor($secretContainer, index) {
+    this.$secret = $secretContainer.children[index];
+  }
+
+  setCorrect(correctAnswer) {
+    this.$secret.style.backgroundColor = "#43bd73";
+    this.$secret.innerText = correctAnswer;
+  }
+
+  setIncorrect(correctAnswer) {
+    this.$secret.style.backgroundColor = "#ff274d";
+    this.$secret.classList.remove("animate__bounceIn");
+    this.$secret.classList.add("animate__shakeX");
+    this.$secret.innerText = correctAnswer;
+  }
+}
+
+const ui = new UI(document, SecretNote);
 
 const data = {
   chords: [
@@ -72,17 +166,7 @@ function getAnswer() {
   return new Promise((resolve, reject) => {
     state.cleanupPendingAnswer = reject;
 
-    $noteWrapper.addEventListener(
-      "click",
-      (event) => {
-        const clickedElement = event.target;
-
-        if (clickedElement.tagName === "BUTTON") {
-          resolve(clickedElement.dataset.note);
-        }
-      },
-      { once: true }
-    );
+    ui.onAnswer(resolve);
   });
 }
 
@@ -92,22 +176,16 @@ async function playSequence(time, chord) {
 
     for (const [index, secret] of Object.entries(state.secrets)) {
       const answer = await getAnswer();
-      const $current = $secrets.children[index];
+      const currentSecret = ui.getSecretByIndex(index);
 
       if (answer !== secret.name) {
-        $current.style.backgroundColor = "#ff274d";
-        $current.classList.remove("animate__bounceIn");
-        $current.classList.add("animate__shakeX");
-        $current.innerText = secret.name;
-
-        console.log(state.secrets.map((s) => s.name).join(", "), answer);
-
         synth.triggerAttackRelease(["Bb3", "B3"], "8n");
-        $score.innerText = parseInt($score.innerText) - 1;
+
+        currentSecret.setIncorrect(secret.name);
+        ui.decrementScore();
       } else {
-        $current.style.backgroundColor = "#43bd73";
-        $current.innerText = answer;
-        $score.innerText = parseInt($score.innerText) + 1;
+        currentSecret.setCorrect(answer);
+        ui.incrementScore();
       }
     }
 
@@ -120,14 +198,14 @@ async function playSequence(time, chord) {
     );
 
     if (!chord.secret) {
-      Tone.Draw.schedule(flashByName(chord.name), time);
+      Tone.Draw.schedule(ui.flashButtonByName(chord.name), time);
     } else {
-      $secrets.children[state.secrets.indexOf(chord)].classList.add(
-        "animate__bounceIn"
-      );
+      Tone.Draw.schedule(() => {
+        ui.showSecretByIndex(state.secrets.indexOf(chord));
+      }, time);
     }
   } else {
-    Tone.Draw.schedule(flashByName(), time);
+    Tone.Draw.schedule(ui.flashButtonByName(), time);
   }
 }
 
@@ -144,30 +222,24 @@ function run() {
     state.cleanupPendingAnswer();
   }
 
-  const settingsForm = new FormData($settings);
+  const settings = ui.getUserInput();
 
   state = {
-    bpm: Number(settingsForm.get("bpm")),
-    numberOfSecretNotes: Number(settingsForm.get("secretNotes")),
-    secretType: settingsForm.get("secret"),
-    preroll: settingsForm.get("preroll"),
+    ...settings,
     secrets: [],
     cleanupPendingAnswer: null,
   };
 
-  t.bpm.value = state.bpm;
+  t.bpm.value = settings.bpm;
 
-  $secrets.innerHTML = "";
+  ui.cleanup();
 
   let i = 0;
   while (i++ < state.numberOfSecretNotes) {
     const secret = getSecret(data[state.secretType]);
     state.secrets.push({ ...secret, secret: true });
 
-    const $secret = document.createElement("span");
-    $secret.innerText = "?";
-    $secret.classList.add("animate__animated");
-    $secrets.appendChild($secret);
+    ui.createSecret();
   }
 
   seq.events = [...sequences[state.preroll]];
@@ -178,21 +250,19 @@ function run() {
 
   seq.events.push(...state.secrets, data.stop);
 
-  // synth.triggerAttackRelease(Tone.Frequency('A4').harmonize([0, 4, 7]), '2n')
-
   t.start();
 }
 
-$start.addEventListener("mousedown", run);
+ui.$start.addEventListener("mousedown", run);
 
-$root.addEventListener("mousedown", () => {
+ui.$root.addEventListener("mousedown", () => {
   synth.triggerAttackRelease(data.singles[0].notes, CONFIG.subdivision);
 });
 
-$secrets.addEventListener("mousedown", (event) => {
+ui.$secretContainer.addEventListener("mousedown", (event) => {
   const $el = event.target;
   if ($el.tagName === "SPAN") {
-    const arrIndex = Array.from($secrets.children).indexOf($el);
+    const arrIndex = Array.from(ui.$secretContainer.children).indexOf($el);
 
     synth.triggerAttackRelease(
       state.secrets[arrIndex].notes,
