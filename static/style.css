@@ -39,7 +39,7 @@ h1 {
 }
 
 .start-page .content {
-  margin-bottom: 6rem;
+  margin-bottom: 4rem;
 
   & p {
     font-size: 1.75rem;
@@ -47,7 +47,10 @@ h1 {
 }
 
 .start-page {
-  & ul {
+  .post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
     list-style: none;
     padding: 0;
   }

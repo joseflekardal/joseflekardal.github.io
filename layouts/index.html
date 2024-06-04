@@ -2,16 +2,16 @@
 <main class="start-page">
   <div class="content">{{ .Content }}</div>
 
-  <ul>
+  <ul class="post-list">
     {{- $pag := .Paginate (where .Site.RegularPages "Type" "in"
     .Site.MainSections) -}} {{- range $pag.Pages -}}
     <li>
-      <a href="{{ .RelPermalink }}">
-        {{ .Date.Format "2006-01-02" }} | {{ .LinkTitle }} | 
-        {{ range .Params.categories }}
-          {{ . }}
+        {{ .Date.Format "2006-01-02" }} | {{ range .Params.categories }}
+          <a href="/categories/{{ . | urlize }}">{{ . }}</a>
         {{ end }}
 
+      <a href="{{ .RelPermalink }}">
+        <h2>{{ .LinkTitle }}</h2>
         {{ .Summary }}
       </a>
     </li>
