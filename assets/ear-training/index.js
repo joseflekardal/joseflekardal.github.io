@@ -38,7 +38,7 @@ const sequences = {
   none: [],
 };
 
-function getSecret(list: any[]) {
+function getSecret(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
@@ -47,7 +47,7 @@ function transpose(offset) {
 }
 
 function getAnswer() {
-  return new Promise<string>((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     state.cleanupPendingAnswer = reject;
 
     ui.onAnswer(resolve);
