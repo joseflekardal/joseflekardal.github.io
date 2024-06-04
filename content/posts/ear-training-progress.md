@@ -27,7 +27,9 @@ const seq = new Tone.Sequence(
 ).start(0);
 
 const transport = Tone.getTransport();
-// play it transport.start();
+
+// play it
+transport.start();
 ```
 
 Using the sequence api allowed me to quickly add functionality for secret chords instead of only single notes. I believe that I now have a good foundation to add any features that comes to mind.
