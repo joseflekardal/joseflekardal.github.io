@@ -38,10 +38,19 @@
       {{ end }}
     </footer>
 
-    {{ with .Resources.GetMatch "*.js" }}
-      <script type="module">
-        {{ .Content | safeJS }}
-      </script>
+    {{ $postName := .Title | urlize }}
+
+    {{ with resources.GetMatch (print $postName "/index.*")}}
+      {{ if hugo.IsDevelopment }}
+        {{ with . | js.Build }}
+          <script src="{{ .RelPermalink }}"></script>
+        {{ end }}
+      {{ else }}
+        {{ $opts := dict "minify" true }}
+        {{ with . | js.Build $opts | fingerprint }}
+          <script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous"></script>
+        {{ end }}
+      {{ end }}
     {{ end }}
   </body>
 </html>

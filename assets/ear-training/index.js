@@ -1,114 +1,10 @@
+import { UI, SecretNote } from "./lib";
+
 const CONFIG = {
   subdivision: "4n",
   transpose: 0,
 };
 let state = {};
-
-class UI {
-  constructor(document, SecretNote) {
-    this.$buttons = Array.from(document.querySelectorAll("#app button"));
-    this.$start = document.getElementById("start");
-    this.$root = document.getElementById("root");
-    this.$noteWrapper = document.getElementById("note-wrapper");
-    this.$settings = document.getElementById("settings");
-    this.$score = document.getElementById("score");
-    this.$bpmRange = this.$settings.querySelector("input[name=bpm]");
-    this.$bpmHeader = document.getElementById("bpm");
-    this.$secretContainer = document.getElementById("secrets");
-
-    this.SecretNote = SecretNote;
-
-    this.hookupEventListeners();
-  }
-
-  hookupEventListeners() {
-    this.$bpmRange.addEventListener("input", (event) => {
-      this.$bpmHeader.innerText = `Speed (${event.target.value} bpm)`;
-    });
-  }
-
-  cleanup() {
-    this.$secretContainer.innerHTML = "";
-  }
-
-  incrementScore() {
-    this.$score.innerText = parseInt(this.$score.innerText) + 1;
-  }
-
-  decrementScore() {
-    this.$score.innerText = parseInt(this.$score.innerText) - 1;
-  }
-
-  flashButtonByName(chordName) {
-    return () => {
-      this.$buttons.forEach(($btn) => {
-        if (chordName && $btn.dataset.note === chordName) {
-          $btn.classList.add("highlight");
-        } else {
-          $btn.classList.remove("highlight");
-        }
-      });
-    };
-  }
-
-  getSecretByIndex(index) {
-    return new this.SecretNote(this.$secretContainer, index);
-  }
-
-  createSecret() {
-    const $secret = document.createElement("span");
-    $secret.innerText = "?";
-    $secret.classList.add("animate__animated");
-    this.$secretContainer.appendChild($secret);
-  }
-
-  showSecretByIndex(index) {
-    this.$secretContainer.children[index].classList.add("animate__bounceIn");
-  }
-
-  getUserInput() {
-    const formData = new FormData(this.$settings);
-
-    return {
-      bpm: Number(formData.get("bpm")),
-      numberOfSecretNotes: Number(formData.get("secretNotes")),
-      secretType: formData.get("secret"),
-      preroll: formData.get("preroll"),
-    };
-  }
-
-  onAnswer(cb) {
-    this.$noteWrapper.addEventListener(
-      "click",
-      (event) => {
-        const clickedElement = event.target;
-
-        if (clickedElement.tagName === "BUTTON") {
-          cb(clickedElement.dataset.note);
-        }
-      },
-      { once: true }
-    );
-  }
-}
-
-class SecretNote {
-  constructor($secretContainer, index) {
-    this.$secret = $secretContainer.children[index];
-  }
-
-  setCorrect(correctAnswer) {
-    this.$secret.style.backgroundColor = "#43bd73";
-    this.$secret.innerText = correctAnswer;
-  }
-
-  setIncorrect(correctAnswer) {
-    this.$secret.style.backgroundColor = "#ff274d";
-    this.$secret.classList.remove("animate__bounceIn");
-    this.$secret.classList.add("animate__shakeX");
-    this.$secret.innerText = correctAnswer;
-  }
-}
 
 const ui = new UI(document, SecretNote);
 
@@ -142,20 +38,8 @@ const sequences = {
   none: [],
 };
 
-function getSecret(list) {
+function getSecret(list: any[]) {
   return list[Math.floor(Math.random() * list.length)];
-}
-
-function flashByName(chordName) {
-  return () => {
-    $buttons.forEach(($btn) => {
-      if (chordName && $btn.dataset.note === chordName) {
-        $btn.classList.add("highlight");
-      } else {
-        $btn.classList.remove("highlight");
-      }
-    });
-  };
 }
 
 function transpose(offset) {
@@ -163,7 +47,7 @@ function transpose(offset) {
 }
 
 function getAnswer() {
-  return new Promise((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     state.cleanupPendingAnswer = reject;
 
     ui.onAnswer(resolve);
