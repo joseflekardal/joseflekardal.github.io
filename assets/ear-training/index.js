@@ -47,9 +47,7 @@ function transpose(offset) {
 }
 
 function getAnswer() {
-  return new Promise((resolve, reject) => {
-    state.cleanupPendingAnswer = reject;
-
+  return new Promise((resolve) => {
     ui.onAnswer(resolve);
   });
 }
@@ -60,6 +58,7 @@ async function playSequence(time, chord) {
 
     for (const [index, secret] of Object.entries(state.secrets)) {
       const answer = await getAnswer();
+
       const currentSecret = ui.getSecretByIndex(index);
 
       if (answer !== secret.name) {
@@ -102,19 +101,16 @@ const seq = new Tone.Sequence(playSequence, [], CONFIG.subdivision).start(0);
 seq.loop = false;
 
 function run() {
-  if (state.cleanupPendingAnswer) {
-    state.cleanupPendingAnswer();
-  }
-
   const settings = ui.getUserInput();
 
   state = {
     ...settings,
     secrets: [],
-    cleanupPendingAnswer: null,
   };
 
   t.bpm.value = settings.bpm;
+
+  ui.$start.disabled = true;
 
   ui.cleanup();
 

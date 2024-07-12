@@ -83,6 +83,11 @@ button {
     transform: scale(1.05);
     color: white;
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 .highlight pre {

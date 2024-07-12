@@ -110,16 +110,15 @@ export class UI {
   }
 
   onAnswer(cb: (s: string) => void) {
-    this.$noteWrapper.addEventListener(
-      "click",
-      (event) => {
-        const clickedElement = event.target as HTMLElement;
+    const listener = (event: MouseEvent) => {
+      const clickedElement = event.target as HTMLElement;
 
-        if (clickedElement.tagName === "BUTTON") {
-          cb(clickedElement.dataset.note);
-        }
-      },
-      { once: true }
-    );
+      if (clickedElement.tagName === "BUTTON") {
+        cb(clickedElement.dataset.note);
+        this.$noteWrapper.removeEventListener("click", listener);
+      }
+    };
+
+    this.$noteWrapper.addEventListener("click", listener);
   }
 }
