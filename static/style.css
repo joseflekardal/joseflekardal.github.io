@@ -18,7 +18,7 @@ body {
   font-weight: 400;
   font-style: normal;
   font-size: 16px;
-  max-width: 1200px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 1rem;
 }
@@ -26,6 +26,10 @@ body {
 a {
   color: var(--text-color);
   font-weight: bold;
+}
+
+p {
+  width: 80ch;
 }
 
 h1 {
@@ -92,4 +96,7 @@ button {
 
 .highlight pre {
   padding: 1rem;
+}
+
+section:has(> button) {
 }
