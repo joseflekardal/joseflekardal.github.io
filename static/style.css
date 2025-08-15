@@ -29,7 +29,7 @@ a {
 }
 
 p {
-  width: 80ch;
+  max-width: 80ch;
 }
 
 h1 {
